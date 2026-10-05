@@ -324,6 +324,25 @@ body[data-env=av] .summary .sumcard.best .val{color:var(--anthracite)}
 .tl8-col.best .tl8-res{color:var(--ok)}
 .tl8-res small{display:block;font-family:var(--font-body);font-weight:400;font-size:.82rem;color:var(--fg-muted);margin-top:2px}
 @media (max-width:720px){.envtabs,.tl8-zones,.tl8-cols{grid-template-columns:1fr}.tl8-ticks span:not(:first-child):not(.big){display:none}.tl8-axis{padding-inline:10%}}
+
+/* ---- Calculateur de plafond ---- */
+.plafcalc{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;background:#fff;border:1px solid var(--line)}
+.pc-form{padding:22px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.pc-form .ph{font-family:var(--font-display);font-weight:700;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:4px}
+.pc-res{padding:22px;display:flex;flex-direction:column;gap:16px;background:var(--bg-blue)}
+.pc-big .lbl,.pc-eco .lbl{font-family:var(--font-display);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-muted)}
+.pc-big .val{font-family:var(--font-display);font-weight:800;font-size:2.4rem;color:var(--blue);line-height:1.1}
+.pc-eco{background:#fff;border:1px solid var(--line);padding:14px 16px}
+.pc-eco .val{font-family:var(--font-display);font-weight:800;font-size:1.8rem;color:var(--ok);line-height:1.1}
+.pc-big .sub,.pc-eco .sub{font-size:.82rem;color:var(--fg-muted);margin-top:2px}
+.pc-res .kv{background:#fff;border:1px solid var(--line);padding:10px 14px}
+.pc-track{height:14px;background:#fff;border:1px solid var(--line);overflow:hidden}
+.pc-track i{display:block;height:100%;background:var(--blue);width:0;transition:width .3s}
+.pc-track i.over{background:var(--bad)}
+.pc-legend{display:flex;justify-content:space-between;font-size:.78rem;color:var(--fg-muted);margin-top:4px}
+#plafcalc[data-st=sal] .pc-tns{display:none}
+#plafcalc[data-st=tns] .pc-sal{display:none}
+@media (max-width:720px){.plafcalc{grid-template-columns:1fr}.pc-form{border-right:0;border-bottom:1px solid var(--line)}}
 </style>
 
 <header>
@@ -338,6 +357,7 @@ body[data-env=av] .summary .sumcard.best .val{color:var(--anthracite)}
     <a class="tab" role="tab" href="#per" data-view="per" aria-selected="false"><span class="i">2</span>Plan Épargne Retraite</a>
     <a class="tab" role="tab" href="#assurance-vie" data-view="assurance-vie" aria-selected="false"><span class="i">3</span>Assurance vie</a>
     <a class="tab" role="tab" href="#simulateur" data-view="simulateur" aria-selected="false"><span class="i">4</span>Simulateur</a>
+    <a class="tab" role="tab" href="#recap" data-view="recap" aria-selected="false"><span class="i">5</span>Récapitulatif</a>
   </div>
 </nav>
 
@@ -551,6 +571,25 @@ body[data-env=av] .summary .sumcard.best .val{color:var(--anthracite)}
             <div><span>Plafond</span><b class="num">≈ 87 000 € par an</b></div>
           </div>
           <p class="small muted">Exemple : 120 000 € de bénéfice → 12 000 € + 15 % × (120 000 − 48 060) ≈ 22 800 € déductibles. Déductible du bénéfice, donc aussi économie de cotisations sociales dans certains cas.</p>
+        </div>
+      </div>
+      <div class="plafcalc" id="plafcalc">
+        <div class="pc-form">
+          <div class="ph">Calculez votre plafond</div>
+          <div class="field"><label>Statut</label><div class="seg" id="pcStatut"><button type="button" data-v="sal" aria-pressed="true">Salarié / assimilé</button><button type="button" data-v="tns" aria-pressed="false">TNS (Madelin)</button></div></div>
+          <div class="field"><label for="pcIncome"><span class="pc-sal">Revenus professionnels nets (année N-1)</span><span class="pc-tns">Bénéfice imposable (année N)</span></label><div class="in"><input id="pcIncome" type="number" min="0" step="1000" value="70000"><span class="unit">€</span></div></div>
+          <div class="field"><label for="pcTmi">Tranche marginale d'imposition</label><div class="in"><select id="pcTmi"><option value="0">0 %</option><option value="11">11 %</option><option value="30" selected>30 %</option><option value="41">41 %</option><option value="45">45 %</option></select></div></div>
+          <div class="field pc-sal"><label for="pcUnused">Plafonds non utilisés des 3 années précédentes (sur l'avis d'imposition)</label><div class="in"><input id="pcUnused" type="number" min="0" step="500" value="0"><span class="unit">€</span></div></div>
+          <div class="field pc-sal"><label for="pcSpouse">Plafond disponible du conjoint à mutualiser</label><div class="in"><input id="pcSpouse" type="number" min="0" step="500" value="0"><span class="unit">€</span></div></div>
+          <div class="field"><label for="pcVers">Versement envisagé cette année</label><div class="in"><input id="pcVers" type="number" min="0" step="1000" value="7000"><span class="unit">€</span></div></div>
+          <p class="hint">PASS 2026 : 48 060 €. Calcul indicatif, le plafond exact figure sur votre avis d'imposition.</p>
+        </div>
+        <div class="pc-res">
+          <div class="pc-big"><div class="lbl">Plafond déductible estimé</div><div class="val num" id="pcPlaf">—</div><div class="sub" id="pcPlafSub"></div></div>
+          <div class="kv" id="pcRows"></div>
+          <div class="pc-eco"><div class="lbl">Économie d'impôt sur votre versement</div><div class="val num" id="pcEco">—</div><div class="sub" id="pcEcoSub"></div></div>
+          <div class="pc-bar"><div class="pc-track"><i id="pcFill"></i></div><div class="pc-legend"><span id="pcLegL"></span><span id="pcLegR"></span></div></div>
+          <p class="hint warn" id="pcWarn" hidden></p>
         </div>
       </div>
     </div>
@@ -942,9 +981,26 @@ body[data-env=av] .summary .sumcard.best .val{color:var(--anthracite)}
     </div>
   </section>
 
-  <section class="alt">
+</div>
+<!-- ===================== ONGLET 5 : RÉCAPITULATIF ===================== -->
+<div class="view" id="view-recap" role="tabpanel">
+  <div class="hero cab">
+    <div class="wrap grid">
+      <div>
+        <div class="eyebrow">Récapitulatif</div>
+        <h1 style="margin-top:10px">PER ou assurance vie ?<br>Les deux, dans le bon ordre.</h1>
+        <p class="lead">Le PER jusqu'au plafond de déduction utile, l'assurance vie pour le reste et pour la disponibilité. Cette page résume tout ce qui a été vu, critère par critère.</p>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><b>PER</b><span>si vous payez de l'impôt aujourd'hui et que l'argent peut attendre la retraite</span></div>
+        <div class="kpi" style="border-left-color:var(--anthracite)"><b style="color:var(--anthracite)">Assurance vie</b><span>si vous voulez garder la main, ou transmettre hors succession</span></div>
+        <div class="kpi"><b>0 %</b><span>de frais sur versements chez Evoa Courtage, sur les deux contrats</span></div>
+      </div>
+    </div>
+  </div>
+  <section>
     <div class="wrap">
-      <div class="sec-head"><div class="eyebrow">Récapitulatif</div><h2>PER et assurance vie face à face</h2><p>Les deux enveloppes ne sont pas concurrentes : la bonne question est <em>combien sur chacune</em>.</p></div>
+      <div class="sec-head"><div class="eyebrow">Critère par critère</div><h2>PER et assurance vie face à face</h2><p>Les deux enveloppes ne sont pas concurrentes : la bonne question est <em>combien sur chacune</em>.</p></div>
     <div class="tablewrap">
       <table>
         <thead><tr><th>Critère</th><th class="per">PER</th><th class="av">Assurance vie</th></tr></thead>
@@ -972,6 +1028,18 @@ body[data-env=av] .summary .sumcard.best .val{color:var(--anthracite)}
       <div class="note" style="margin-top:24px">Dans la plupart des situations, la réponse est <strong>les deux</strong> : le PER jusqu'au plafond de déduction utile, l'assurance vie pour le reste et pour la disponibilité. Chez Evoa Courtage, les deux contrats sont ouverts sans frais sur versement, chez les mêmes assureurs.</div>
     </div>
   </section>
+  <section class="alt">
+    <div class="wrap">
+      <div class="sec-head"><div class="eyebrow">Décider en 4 questions</div><h2>Quelle enveloppe pour vous ?</h2></div>
+      <div class="cases" style="grid-template-columns:repeat(4,1fr)">
+        <div class="case"><b>1. Payez-vous plus de 30 % d'impôt sur la dernière tranche ?</b><span>Oui → le PER rapporte 30 à 45 % d'économie immédiate. Non → l'assurance vie d'abord.</span></div>
+        <div class="case"><b>2. Pouvez-vous bloquer cet argent jusqu'à la retraite ?</b><span>Oui → PER. Non, ou pas sûr → assurance vie, disponible à tout moment.</span></div>
+        <div class="case"><b>3. Vos revenus baisseront-ils à la retraite ?</b><span>Oui → l'écart de tranche est votre gain net sur le PER. Non → l'avantage se réduit, l'assurance vie reprend l'avantage.</span></div>
+        <div class="case"><b>4. L'objectif est-il de transmettre ?</b><span>Oui → assurance vie, primes versées avant 70 ans, clause bénéficiaire sur mesure. Le PER se bascule avant 70 ans.</span></div>
+      </div>
+      <div class="next"><span>Chiffrer votre situation avec les deux enveloppes.</span><a href="#simulateur">Ouvrir le simulateur</a></div>
+    </div>
+  </section>
 </div>
 </main>
 
@@ -983,17 +1051,59 @@ body[data-env=av] .summary .sumcard.best .val{color:var(--anthracite)}
   </div>
 </footer>
 
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmt=n=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Math.round(n));
+  const PASS=48060; let st='sal';
+  const root=$('plafcalc'); if(!root) return;
+  root.dataset.st=st;
+  $('pcStatut').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('pcStatut').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false'));b.setAttribute('aria-pressed','true');st=b.dataset.v;root.dataset.st=st;calc();});
+  ['pcIncome','pcTmi','pcUnused','pcSpouse','pcVers'].forEach(id=>$(id).addEventListener('input',calc));
+  function calc(){
+    const inc=+$('pcIncome').value||0, tmi=(+$('pcTmi').value||0)/100, vers=+$('pcVers').value||0;
+    let base, rows=[];
+    if(st==='tns'){
+      const b=Math.min(inc,8*PASS);
+      const p1=b*0.10, p2=Math.max(0,b-PASS)*0.15;
+      base=Math.max(0.10*PASS,p1+p2);
+      rows=[['10 % du bénéfice (plafonné à 8 PASS)',fmt(p1)],['+ 15 % de la part entre 1 et 8 PASS',fmt(p2)],['Plancher 10 % du PASS',fmt(0.10*PASS)]];
+      $('pcPlafSub').textContent='Cadre Madelin, déductible du bénéfice de l\'année';
+    } else {
+      const r=Math.min(Math.max(0.10*inc,0.10*PASS),0.10*8*PASS);
+      const un=+$('pcUnused').value||0, sp=+$('pcSpouse').value||0;
+      base=r+un+sp;
+      rows=[['10 % des revenus N-1 (entre 10 % et 80 % du PASS)',fmt(r)],['+ plafonds non utilisés N-1 à N-3',fmt(un)],['+ plafond du conjoint mutualisé',fmt(sp)]];
+      $('pcPlafSub').textContent='Déductible du revenu imposable du foyer';
+    }
+    $('pcPlaf').textContent=fmt(base);
+    $('pcRows').innerHTML=rows.map(r=>`<div><span>${r[0]}</span><b class="num">${r[1]}</b></div>`).join('');
+    const ded=Math.min(vers,base), eco=ded*tmi;
+    $('pcEco').textContent='− '+fmt(eco);
+    $('pcEcoSub').textContent=`${fmt(ded)} déduits × TMI ${Math.round(tmi*100)} % · effort réel : ${fmt(vers-eco)} pour ${fmt(vers)} investis`;
+    const ratio=base>0?vers/base:0;
+    const f=$('pcFill'); f.style.width=Math.min(100,ratio*100)+'%'; f.classList.toggle('over',ratio>1);
+    $('pcLegL').textContent='Versement : '+fmt(vers); $('pcLegR').textContent='Plafond : '+fmt(base);
+    const w=$('pcWarn');
+    if(vers>base){w.hidden=false;w.textContent=`Le versement dépasse le plafond de ${fmt(vers-base)} : cette part ne sera pas déduite (ou le sera via un PER à versements non déduits). Vous pouvez répartir sur deux années civiles.`;}
+    else if(tmi<0.30){w.hidden=false;w.textContent='À 11 % ou moins de TMI, la déduction rapporte peu : l\'assurance vie ou le PER à versements non déduits sont souvent préférables.';}
+    else w.hidden=true;
+  }
+  calc();
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 // ---- Onglets (routage par ancre simple) ----
 (function(){
-  const views=['cabinet','per','assurance-vie','simulateur'];
+  const views=['cabinet','per','assurance-vie','simulateur','recap'];
   const tabs=[...document.querySelectorAll('.tab')];
   function show(name, scroll){
     if(!views.includes(name)) name='cabinet';
     views.forEach(v=>document.getElementById('view-'+v).classList.toggle('on',v===name));
     tabs.forEach(t=>t.setAttribute('aria-selected', String(t.dataset.view===name)));
-    document.title = {cabinet:'Evoa Courtage — Le cabinet',per:'Evoa Courtage — Plan Épargne Retraite','assurance-vie':'Evoa Courtage — Assurance vie',simulateur:'Evoa Courtage — Simulateur'}[name];
+    document.title = {cabinet:'Evoa Courtage — Le cabinet',per:'Evoa Courtage — Plan Épargne Retraite','assurance-vie':'Evoa Courtage — Assurance vie',simulateur:'Evoa Courtage — Simulateur',recap:'Evoa Courtage — Récapitulatif'}[name];
     if(scroll) window.scrollTo({top:0,behavior:'instant' in window ? 'instant':'auto'});
     if(name==='simulateur' && window.__simRun) requestAnimationFrame(()=>window.__simRun());
   }
