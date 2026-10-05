@@ -1278,7 +1278,10 @@ body[data-env=av] .summary .sumcard.best .val{color:var(--anthracite)}
       const tE=avTax(p,amtE,sE.val,sE.paid,yi), tC=avTax(p,amtC,sC.val,sC.paid,yi);
       const rows = (X,t,amt)=>[['Capital disponible en année '+yi, fmt(X.val)],['Montant racheté', fmt(amt)],['Part de gains dans le rachat', fmt(t.gain)],['Fiscalité', '− '+fmt(t.tax), 'color:var(--bad)'],['Taux effectif sur le rachat', pct(amt>0?t.tax/amt*100:0)],['Capital restant sur le contrat', fmt(X.val-amt)]];
       $('p2').innerHTML = card('E',p,'Net dans votre poche',fmt(amtE-tE.tax),yi<8?'avant 8 ans':'après 8 ans',rows(sE,tE,amtE)).replace('class="cmpcard evoa"','class="cmpcard evoa solo"');
-      $('p2note').innerHTML = `<p class="hint">${tE.detail}. ${yi<8?'Patienter jusqu\'à l\'année 8 ouvrirait l\'abattement de '+fmt(4600*p.foyer)+' par an sur les gains.':'En étalant les rachats sur plusieurs années civiles, l\'impôt peut souvent être ramené aux seuls prélèvements sociaux.'}</p>`;
+      const gshare = sE.val>0? Math.max(0,1-sE.paid/sE.val):0;
+      const freeW = gshare>0? 4600*p.foyer/gshare : sE.val;
+      $('p2note').innerHTML = (yi>=8 ? `<div class="deltabar"><span>${fmt(Math.min(freeW,sE.val))}</span> rachetables chaque année sans impôt sur le revenu</div><p class="hint" style="margin-top:6px">Votre contrat contient ${pct(gshare*100)} de gains : l'abattement de ${fmt(4600*p.foyer)} de gains couvre donc un rachat de ${fmt(freeW)} par an. Seuls les prélèvements sociaux (${pct(p.ps*100)} sur la part de gains, soit ${fmt(Math.min(freeW,sE.val)*gshare*p.ps)}) restent dus.</p>` : '') +
+        `<p class="hint" style="margin-top:8px">${tE.detail}. ${yi<8?'Patienter jusqu\'à l\'année 8 ouvrirait l\'abattement de '+fmt(4600*p.foyer)+' par an sur les gains.':'En étalant les rachats sur plusieurs années civiles, l\'impôt peut souvent être ramené aux seuls prélèvements sociaux.'}</p>`;
     }
 
     // ---- Phase 3
